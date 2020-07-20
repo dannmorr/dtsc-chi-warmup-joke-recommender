@@ -228,7 +228,7 @@ jokes.iloc[recommend_index][1]
 
 ### Assignment
 
-Please create a function called `recommend_joke` that will receive a user index and a knn model and returns a recommended joke.
+Please create a function called `recommend_joke` that will receive a user index and returns a recommended joke.
 
 
 ```python
