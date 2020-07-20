@@ -1136,6 +1136,7 @@ def recommend_joke(user_index, model):
 
 
 ```python
+# __SOLUTION__
 def recommendation_data():
     df = pd.read_csv('./data/jesterfinal151cols.csv', header=None)
     df = df.fillna(99)
