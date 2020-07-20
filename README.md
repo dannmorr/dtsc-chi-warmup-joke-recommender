@@ -966,6 +966,63 @@ jokes.iloc[recommend_index][1]
 
 Please create a function called `recommend_joke` that will receive a user index and a knn model and returns a recommended joke.
 
+
+```python
+def recommendation_data():
+    df = pd.read_csv('./data/jesterfinal151cols.csv', header=None)
+    df = df.fillna(99)
+    jokes = pd.read_table('./data/jester_items.tsv', header = None)
+    jokes[0] = jokes[0].apply(lambda x: x.replace(':', ''))
+    jokes[0] = jokes[0].astype(int)
+    jokes.set_index(0, inplace=True)
+    
+    return df, jokes
+
+def userA_and_others(user_index, df):
+    ## Drop column that counts the numbers of jokes each user has rated. 
+    ## Isolate the row for the desired user
+    userA = df.drop(0, axis=1)\
+          .loc[user_index, :]
+    
+    # Isolate all other users
+    others = df.drop(0, axis=1).drop(index=user_index, axis=0)
+    
+    return userA, others
+
+def nearest_neighbors(userA, others):
+    # Fit Nearest Neighbors
+    knn = NearestNeighbors(n_neighbors=5, metric='cosine', n_jobs=-1)
+    knn.fit(others)
+    
+    distances, indices = knn.kneighbors(userA.values.reshape(1, -1))
+    distances, indices = distances[0], indices[0] 
+    
+    return distances, indices
+
+def find_joke(df, neighbor_indices, jokes_not_rated):
+    
+    user_jokes = df.drop(0, axis=1).iloc[neighbor_indices][jokes_not_rated]
+    ratings = user_jokes.replace(99, 0).sum()
+    user_jokes = user_jokes.T
+    user_jokes['total'] = ratings
+    recommend_index = user_jokes['total'].idxmax()
+    return jokes.iloc[recommend_index][1]    
+
+def recommend_joke(user_index):
+    
+    df, jokes = recommendation_data()
+
+    userA, others = userA_and_others(user_index, df)
+
+    distances, neighbor_indices = nearest_neighbors(userA, others)
+
+    
+    jokes_not_rated = np.where(userA==99)[0]
+    jokes_not_rated = np.delete(jokes_not_rated, 0)
+    
+    return find_joke(df, neighbor_indices, jokes_not_rated)
+```
+
 Now we can recommend a joke to any user in the dataset!
 
 
